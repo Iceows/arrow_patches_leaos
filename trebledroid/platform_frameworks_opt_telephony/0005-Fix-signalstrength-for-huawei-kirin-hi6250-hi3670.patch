@@ -1,7 +1,7 @@
-From 3d5a81b15afa64251b81c21e0c38b47261ae3bdf Mon Sep 17 00:00:00 2001
+From b4cfa9cb8aed0a8e6660859afdeebc6872c5a9ad Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Thu, 6 Oct 2022 08:35:38 +0200
-Subject: [PATCH 4/8] Fix signalstrength for huawei kirin (hi6250, hi3670)
+Subject: [PATCH 05/10] Fix signalstrength for huawei kirin (hi6250, hi3670)
 
 The RILUtils.convertHalSignalStrength function does not work correctly under Huawei hi6250 and hi3660 platform. We have therefore replaced this function with a new one specifically for this Kirin platform.
 
@@ -16,10 +16,10 @@ The RILUtils.convertHalSignalStrength function does not work correctly under Hua
  2 files changed, 136 insertions(+), 4 deletions(-)
 
 diff --git a/src/java/com/android/internal/telephony/RIL.java b/src/java/com/android/internal/telephony/RIL.java
-index 0c1b7cdf8c..f30bee5846 100644
+index 6de66527e1..341d9c5d74 100644
 --- a/src/java/com/android/internal/telephony/RIL.java
 +++ b/src/java/com/android/internal/telephony/RIL.java
-@@ -5931,6 +5931,125 @@ public class RIL extends BaseCommands implements CommandsInterface {
+@@ -5930,6 +5930,125 @@ public class RIL extends BaseCommands implements CommandsInterface {
                  new CellSignalStrengthNr());
      }
  

@@ -1,9 +1,9 @@
-From d693506725ccf16ecde2209b953fc00bf5f91271 Mon Sep 17 00:00:00 2001
+From bf7b93109728502a5dac6c5f1884e38b7b79a10a Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
-Date: Sat, 29 Apr 2023 14:55:43 +0200
-Subject: [PATCH 2/2] selinux :  huawei - add selinux denied rules on EMUI 9.1
+Date: Tue, 2 May 2023 09:03:40 +0200
+Subject: [PATCH 07/12] selinux : huawei - add selinux denied rules on EMUI 9.1
 
-Allows you to pass almost all the selinux rules on a Huawei phone under EMUI 9
+Allows you to pass almost all the selinux rules on a Huawei phone under EMUI 9selinux :  huawei - add selinux denied rules on EMUI 9.1
 ---
  sepolicy/huawei.te         | 210 ++++++++++++++++++++++++++++++++++++-
  sepolicy/phh.te            |   4 +
@@ -289,5 +289,5 @@ index 24ed13d..35b69e9 100644
 +allow vold splash2_data_file:dir { rw_dir_perms };
 +allow vold teecd_data_file:dir { rw_dir_perms };
 -- 
-2.25.1
+2.33.0.windows.2
 

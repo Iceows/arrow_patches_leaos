@@ -1,0 +1,91 @@
+From 3150b30b1f7def09f7514fe25c27c6b180980bd8 Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Fri, 26 May 2023 10:25:32 +0200
+Subject: [PATCH] Fix kirin710 bug and add led support
+
+Adds support for kirin710 phones as well as support for leds. Color change based on battery status
+
+Change-Id: I026122153fb021a28c78c74ee381eceff901a913
+---
+ healthd/healthd_draw.cpp         |  4 ++--
+ healthd/healthd_mode_charger.cpp | 32 ++++++++++++++++++++++++++------
+ 2 files changed, 28 insertions(+), 8 deletions(-)
+
+diff --git a/healthd/healthd_draw.cpp b/healthd/healthd_draw.cpp
+index 2266233e18..caf56323a5 100644
+--- a/healthd/healthd_draw.cpp
++++ b/healthd/healthd_draw.cpp
+@@ -97,7 +97,7 @@ HealthdDraw::HealthdDraw(animation* anim)
+         if (!strcmp(prop_hardware,"hi3660")
+             || !strcmp(prop_hardware,"hi3670")
+             || !strcmp(prop_hardware,"hi6250")
+-            || !strcmp(prop_hardware,"kirin"))
++            || !strncmp(prop_hardware,"kirin",5))
+         {
+             LOGV("Kirin Huawei found\n");
+             is_kirin=true;
+@@ -139,7 +139,7 @@ void HealthdDraw::set_brightness(uint32_t value) {
+     LOGV("Kirin - Try to set brightness to %d\n",value)
+     if (WriteStringToFile(std::to_string(value), "/sys/class/leds/lcd_backlight0/brightness")==false) {
+         LOGW("Kirin - WriteStringToFile failed lcd_backlight0, unable to set brightness (lcd_backlight0)\n");
+-        if (WriteStringToFile(std::to_string(0), "/sys/class/leds/lcd_backlight/brightness")==false) {
++        if (WriteStringToFile(std::to_string(value), "/sys/class/leds/lcd_backlight/brightness")==false) {
+             LOGE("Kirin - WriteStringToFile failed lcd_backlight, unable to set brightness (lcd_backlight)\n");
+         }
+     }
+diff --git a/healthd/healthd_mode_charger.cpp b/healthd/healthd_mode_charger.cpp
+index f01ffd486a..efcec11976 100644
+--- a/healthd/healthd_mode_charger.cpp
++++ b/healthd/healthd_mode_charger.cpp
+@@ -64,6 +64,7 @@ using std::string_literals::operator""s;
+ using namespace android;
+ using aidl::android::hardware::health::BatteryStatus;
+ using android::hardware::health::HealthLoop;
++using android::base::WriteStringToFile;
+ 
+ // main healthd loop
+ extern int healthd_main(void);
+@@ -306,15 +307,34 @@ void Charger::UpdateLedState() {
+     if (!have_battery_state_) return;
+     if (health_info_.battery_level == 0 && health_info_.battery_status == BatteryStatus::UNKNOWN) return ;
+ 
+-    // TODO set led with battery_level in % (0->100%)
++	// TODO set led with battery_level in % (0->100%)
+     LOGV("Battery level = %d\n",health_info_.battery_level);
+ 
+-    /*
+-    /sys/class/leds/red/brightness
+-    /sys/class/leds/green/brightness
+-    /sys/class/leds/blue/brightness
+-    */
++    // change led color
++    uint8_t red=0;
++    uint8_t green=0;
++    uint8_t blue=0;
+ 
++    if (health_info_.battery_level>=0 && health_info_.battery_level<33) {
++        red=255;green=0;
++    }
++	if (health_info_.battery_level>=33 && health_info_.battery_level<77) {
++        red=128;green=128;
++    }
++	if (health_info_.battery_level>=77 && health_info_.battery_level<=100) {
++        red=0;green=255;
++    }
++
++	LOGV("Kirin - WriteStringToFile Leds Color : red %d, green %d\n",red,green);
++    if (WriteStringToFile(std::to_string(red), "/sys/class/leds/red/brightness")==false) {
++        LOGE("Kirin - WriteStringToFile failed, unable to set red led\n");
++    }
++    if (WriteStringToFile(std::to_string(green), "/sys/class/leds/green/brightness")==false) {
++        LOGE("Kirin - WriteStringToFile failed, unable to set green led\n");
++    }
++    if (WriteStringToFile(std::to_string(blue), "/sys/class/leds/blue/brightness")==false) {
++        LOGE("Kirin - WriteStringToFile failed, unable to set blue led\n");
++    }
+ }
+ 
+ 
+-- 
+2.25.1
+

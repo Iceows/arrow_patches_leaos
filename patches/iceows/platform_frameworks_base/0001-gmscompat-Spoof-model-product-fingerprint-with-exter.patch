@@ -1,0 +1,92 @@
+From 194ae67d725807a83ad634bdb08324c3c6b6b513 Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Sun, 11 Aug 2024 17:27:20 +0200
+Subject: [PATCH] gmscompat: Spoof model product fingerprint with external prop
+
+Change-Id: Id9bcc5d6e619fdb69307e5aa26ed0b75891163da
+---
+ .../internal/util/PropImitationHooks.java     | 40 +++++++++++++------
+ 1 file changed, 27 insertions(+), 13 deletions(-)
+
+diff --git a/core/java/com/android/internal/util/PropImitationHooks.java b/core/java/com/android/internal/util/PropImitationHooks.java
+index 483ac3df2a30..16b7ddf3825b 100644
+--- a/core/java/com/android/internal/util/PropImitationHooks.java
++++ b/core/java/com/android/internal/util/PropImitationHooks.java
+@@ -65,6 +65,23 @@ public class PropImitationHooks {
+         "FINGERPRINT", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys"
+     );
+ 
++    private static final boolean SAFETYSPOOF_ENABLE =
++            android.os.SystemProperties.getBoolean("persist.sys.phh.safetyspoof", false);
++
++    private static final String SAFETYSPOOF_BRAND =
++            android.os.SystemProperties.get("persist.sys.phh.safetyspoof.brand", "google");
++    private static final String SAFETYSPOOF_MANUFACTURER =
++            android.os.SystemProperties.get("persist.sys.phh.safetyspoof.manufacturer", "Google");
++    private static final String SAFETYSPOOF_MODEL =
++            android.os.SystemProperties.get("persist.sys.phh.safetyspoof.model", "Pixel XL");
++    private static final String SAFETYSPOOF_DEVICE =
++            android.os.SystemProperties.get("persist.sys.phh.safetyspoof.device", "marlin");
++    private static final String SAFETYSPOOF_PRODUCT =
++            android.os.SystemProperties.get("persist.sys.phh.safetyspoof.product", "marlin");
++    private static final String SAFETYSPOOF_FINGERPRINT=
++            android.os.SystemProperties.get("persist.sys.phh.safetyspoof.fingerprint", "google/marlin/marlin:7.1.2/NJH47F/4146041:user/release-keys");
++
++
+     private static final Set<String> sFeatureBlacklist = Set.of(
+         "PIXEL_2017_PRELOAD",
+         "PIXEL_2018_PRELOAD",
+@@ -76,7 +93,6 @@ public class PropImitationHooks {
+         "PIXEL_2021_MIDYEAR_EXPERIENCE"
+     );
+ 
+-    private static volatile String[] sCertifiedProps;
+     private static volatile String sStockFp, sNetflixModel;
+     private static volatile boolean sSpoofPhotos;
+ 
+@@ -98,7 +114,6 @@ public class PropImitationHooks {
+             return;
+         }
+ 
+-        sCertifiedProps = res.getStringArray(R.array.config_certifiedBuildProperties);
+         sStockFp = res.getString(R.string.config_stockFingerprint);
+         sNetflixModel = res.getString(R.string.config_netflixSpoofModel);
+         sSpoofPhotos = res.getBoolean(R.bool.config_spoofGooglePhotos);
+@@ -146,8 +161,8 @@ public class PropImitationHooks {
+     }
+ 
+     private static void setCertifiedPropsForGms() {
+-        if (sCertifiedProps.length == 0) {
+-            dlog("Certified props are not set");
++        if (!SAFETYSPOOF_ENABLE) {
++            dlog("Safetyspoof not enable");
+             return;
+         }
+         final boolean was = isGmsAddAccountActivityOnTop();
+@@ -176,15 +191,14 @@ public class PropImitationHooks {
+     }
+ 
+     private static void setCertifiedProps() {
+-        for (String entry : sCertifiedProps) {
+-            // Each entry must be of the format FIELD:value
+-            final String[] fieldAndProp = entry.split(":", 2);
+-            if (fieldAndProp.length != 2) {
+-                Log.e(TAG, "Invalid entry in certified props: " + entry);
+-                continue;
+-            }
+-            setPropValue(fieldAndProp[0], fieldAndProp[1]);
+-        }
++ 
++        setPropValue("BRAND", SAFETYSPOOF_BRAND);
++        setPropValue("MANUFACTURER", SAFETYSPOOF_MANUFACTURER);
++        setPropValue("DEVICE", SAFETYSPOOF_DEVICE);
++        setPropValue("PRODUCT", SAFETYSPOOF_PRODUCT);
++        setPropValue("MODEL", SAFETYSPOOF_MODEL);
++        setPropValue("FINGERPRINT", SAFETYSPOOF_FINGERPRINT);
++        
+         setSystemProperty(PROP_SECURITY_PATCH, Build.VERSION.SECURITY_PATCH);
+         setSystemProperty(PROP_FIRST_API_LEVEL,
+                 Integer.toString(Build.VERSION.DEVICE_INITIAL_SDK_INT));
+-- 
+2.25.1
+

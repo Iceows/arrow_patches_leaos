@@ -1,0 +1,26 @@
+From 984adbb1331771c03b32c3b507d5b293ac1a7521 Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Sat, 10 Aug 2024 20:42:10 +0200
+Subject: [PATCH] Remove adb-flag
+
+Change-Id: I0a320c0937a9ad2a94a16ffa5c57332450f9a721
+---
+ config/props.mk | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/config/props.mk b/config/props.mk
+index a3f7a1e..5fe037f 100644
+--- a/config/props.mk
++++ b/config/props.mk
+@@ -57,8 +57,6 @@ ifeq ($(TARGET_BUILD_VARIANT),eng)
+ # Disable ADB authentication
+ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=0
+ else
+-# Enable ADB authentication
+-PRODUCT_SYSTEM_DEFAULT_PROPERTIES += ro.adb.secure=1
+ 
+ # Disable extra StrictMode features on all non-engineering builds
+ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += persist.sys.strictmode.disable=true
+-- 
+2.25.1
+

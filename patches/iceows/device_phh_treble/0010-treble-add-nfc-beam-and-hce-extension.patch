@@ -1,7 +1,7 @@
-From e964f08c2289b1f3a7731bf7f36579f4e7cd61b0 Mon Sep 17 00:00:00 2001
+From 4fe3c6a1c6af8289e286b38d273974d680cceaf9 Mon Sep 17 00:00:00 2001
 From: Iceows <mounierr07@gmail.com>
 Date: Wed, 17 May 2023 18:54:10 +0200
-Subject: [PATCH 10/12] treble : add nfc beam and hce extension
+Subject: [PATCH 10/14] treble : add nfc beam and hce extension
 
 reference :
 https://github.com/NXPNFCLinux/nxpnfc_android13/blob/main/device-nfc.mk
@@ -10,7 +10,7 @@ https://github.com/NXPNFCLinux/nxpnfc_android13/blob/main/device-nfc.mk
  1 file changed, 16 insertions(+), 5 deletions(-)
 
 diff --git a/base.mk b/base.mk
-index b9298a2..59d7e84 100644
+index a71359d..506929c 100644
 --- a/base.mk
 +++ b/base.mk
 @@ -6,7 +6,14 @@ PRODUCT_COPY_FILES := \
@@ -64,5 +64,5 @@ index b9298a2..59d7e84 100644
  PRODUCT_COPY_FILES += \
  	device/phh/treble/rw-system.sh:system/bin/rw-system.sh \
 -- 
-2.33.0.windows.2
+2.25.1
 

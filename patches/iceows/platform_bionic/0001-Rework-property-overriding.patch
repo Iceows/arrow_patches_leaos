@@ -1,18 +1,16 @@
-From 530cd7391634cd547681c99d970c3ad37f0c779f Mon Sep 17 00:00:00 2001
-From: Pierre-Hugues Husson <phh@phh.me>
-Date: Thu, 19 Jan 2023 16:44:01 -0500
-Subject: [PATCH 3/4] Rework property overriding
+From e47ff89bb01379d212cfa7deb12b8fe511763f0a Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Sat, 10 Aug 2024 19:15:58 +0200
+Subject: [PATCH]  Rework property overriding
 
-- Support property read with callback in addition to previous
-  constant-size property_get
-- Add another class of redirect "keymaster", to redirect to AOSP/GSI
-  props + SPL based on boot.img
+Co-Authored-By: Pierre-Hugues HUSSON <phh@phh.me>
+Change-Id: I7a663fa6a131b63bae63807b3a615f7d3882534e
 ---
- libc/system_properties/system_properties.cpp | 77 +++++++++++++++-----
- 1 file changed, 58 insertions(+), 19 deletions(-)
+ libc/system_properties/system_properties.cpp | 89 +++++++++++++++-----
+ 1 file changed, 68 insertions(+), 21 deletions(-)
 
 diff --git a/libc/system_properties/system_properties.cpp b/libc/system_properties/system_properties.cpp
-index d6e7e3e68..40ff48bad 100644
+index 8df8d46ea..aa76073f0 100644
 --- a/libc/system_properties/system_properties.cpp
 +++ b/libc/system_properties/system_properties.cpp
 @@ -35,6 +35,7 @@
@@ -23,7 +21,7 @@ index d6e7e3e68..40ff48bad 100644
  #include <fcntl.h>
  
  #include <new>
-@@ -60,23 +61,70 @@ static void read_self() {
+@@ -61,23 +62,76 @@ static void read_self() {
    if(self_ok) return;
    self_ok = true;
  
@@ -93,6 +91,12 @@ index d6e7e3e68..40ff48bad 100644
 +    if(strcmp(name, "ro.build.version.security_patch") == 0) {
 +      return "ro.keymaster.xxx.security_patch";
 +    }
++    if(strcmp(name, "ro.boot.vbmeta.device_state") == 0) {
++      return "ro.keymaster.xxx.vbmeta_state";
++    }
++    if(strcmp(name, "ro.boot.verifiedbootstate") == 0) {
++      return "ro.keymaster.xxx.verifiedbootstate";
++    }
 +  }
 +  return name;
 +}
@@ -100,7 +104,17 @@ index d6e7e3e68..40ff48bad 100644
  static bool is_dir(const char* pathname) {
    struct stat info;
    if (stat(pathname, &info) == -1) {
-@@ -150,17 +198,19 @@ uint32_t SystemProperties::AreaSerial() {
+@@ -86,7 +140,8 @@ static bool is_dir(const char* pathname) {
+   return S_ISDIR(info.st_mode);
+ }
+ 
+-static PropImitationHooks pi_hooks;
++// Iceows
++//static PropImitationHooks pi_hooks;
+ 
+ bool SystemProperties::Init(const char* filename) {
+   // This is called from __libc_init_common, and should leave errno at 0 (http://b/37248982).
+@@ -153,19 +208,22 @@ uint32_t SystemProperties::AreaSerial() {
  }
  
  const prop_info* SystemProperties::Find(const char* name) {
@@ -109,6 +123,10 @@ index d6e7e3e68..40ff48bad 100644
    if (!initialized_) {
      return nullptr;
    }
+ 
+-  pi_hooks.OnFind(&name);
++  // Iceows don't use safetynet hooks
++  //pi_hooks.OnFind(&name);
  
 -  prop_area* pa = contexts_->GetPropAreaForName(name);
 +  prop_area* pa = contexts_->GetPropAreaForName(newName);
@@ -122,7 +140,7 @@ index d6e7e3e68..40ff48bad 100644
  }
  
  static bool is_read_only(const char* name) {
-@@ -243,17 +293,6 @@ void SystemProperties::ReadCallback(const prop_info* pi,
+@@ -248,17 +306,6 @@ void SystemProperties::ReadCallback(const prop_info* pi,
  }
  
  int SystemProperties::Get(const char* name, char* value) {

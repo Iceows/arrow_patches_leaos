@@ -1,0 +1,87 @@
+From f72bae9fcc9fad2ba5d83e01f0c6df6dc893317c Mon Sep 17 00:00:00 2001
+From: Raphael Mounier <mounierr07@gmail.com>
+Date: Thu, 28 Nov 2024 12:50:16 +0100
+Subject: [PATCH 2/3] base: add logging file
+
+---
+ base.mk                   |  2 ++
+ files/debug-log-huawei.rc | 57 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 59 insertions(+)
+ create mode 100644 files/debug-log-huawei.rc
+
+diff --git a/base.mk b/base.mk
+index f7ae9f1..f6f900e 100644
+--- a/base.mk
++++ b/base.mk
+@@ -285,3 +285,5 @@ PRODUCT_PACKAGES += \
+     libfm-kirin-emui9 \
+     hisi.fmradio
+ 
++PRODUCT_COPY_FILES += \
++	device/phh/treble/files/debug-log-huawei.rc:system/etc/init/debug-log-huawei.rc
+diff --git a/files/debug-log-huawei.rc b/files/debug-log-huawei.rc
+new file mode 100644
+index 0000000..805a5b0
+--- /dev/null
++++ b/files/debug-log-huawei.rc
+@@ -0,0 +1,57 @@
++#!/system/bin/sh
++
++
++on fs
++    wait /dev/block/bootdevice/by-name/splash2
++    start dump-logs
++    start teelogcat
++    start debug-kernel
++
++on post-fs-data
++    start debug-kernel-2
++
++on  fs-data
++    start debug-kernel-3
++        
++service dump-logs /system/bin/logcat -b all -f /splash2/logcat-normal.txt -v threadtime
++    class main
++    user root
++    group system
++    disabled
++	
++service teelogcat /vendor/bin/tlogcat > /splash2/tlogcat.txt
++    class late_start
++    user root
++    group system
++    seclabel u:r:tlogcat:s0
++	
++service debug-properties /system/bin/sh -c "getprop > /splash2/debug.properties.txt"
++    class main
++    user root
++    disabled
++    oneshot
++
++service debug-roottree /system/bin/sh -c "ls -la / > /splash2/debug.roottree.txt"
++    class main
++    user root
++    disabled
++    oneshot
++	
++
++service debug-kernel /system/bin/sh -c "cat /proc/kmsg > /splash2/debug.kernel.txt"
++    class main
++    user root
++    disabled
++    oneshot
++
++service debug-kernel-2 /system/bin/sh -c "/system/bin/dmesg > /splash2/debug.kernel-2.txt"
++    class main
++    user root
++    disabled
++    oneshot
++    
++service debug-kernel-3 /system/bin/sh -c "cat /proc/kmsg > /splash2/debug.kernel-3.txt"
++    class main
++    user root
++    disabled
++    oneshot
+-- 
+2.25.1
+

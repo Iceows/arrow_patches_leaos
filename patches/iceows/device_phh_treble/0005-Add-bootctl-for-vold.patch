@@ -1,7 +1,7 @@
-From cee8080c59122625f8db7b1ded33a47760ff21c6 Mon Sep 17 00:00:00 2001
+From 4f403537506e462465cd4332348e85493dc2f371 Mon Sep 17 00:00:00 2001
 From: Raphael Mounier <mounierr07@gmail.com>
 Date: Tue, 2 May 2023 08:54:45 +0200
-Subject: [PATCH 06/12] Add bootctl for vold
+Subject: [PATCH 05/14] Add bootctl for vold
 
 Allows checkpoint commands to check A/B update status
 ---
@@ -19,5 +19,5 @@ index 7cbd585..24ed13d 100644
  allow vold system_data_file:lnk_file { unlink };
  allow mediaextractor sdcard_type:file read;
 -- 
-2.33.0.windows.2
+2.25.1
 
